@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -12,21 +12,30 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { getPalette, type Palette, type ThemeOverride } from "../theme";
+import { type Note } from "../hooks/useNotes";
 
 type NoteEditorProps = {
   themeOverride: ThemeOverride;
   onBack: () => void;
   onSave: (title: string, body: string) => void;
+  editingNote?: Note | null;
 };
 
-export default function NoteEditor({ themeOverride, onBack, onSave }: NoteEditorProps) {
+export default function NoteEditor({ themeOverride, onBack, onSave, editingNote }: NoteEditorProps) {
   const sysScheme = useColorScheme() || "light";
   const scheme = themeOverride === "system" ? sysScheme : themeOverride;
   const colors = getPalette(scheme);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [title, setTitle] = useState(editingNote?.title || "");
+  const [body, setBody] = useState(editingNote?.body || "");
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const isEditing = !!editingNote;
+  const saveButtonText = isEditing ? "Update" : "Save";
+
+  useEffect(() => {
+    setTitle(editingNote?.title || "");
+    setBody(editingNote?.body || "");
+  }, [editingNote]);
 
   return (
     <KeyboardAvoidingView style={styles.container}
@@ -49,7 +58,7 @@ export default function NoteEditor({ themeOverride, onBack, onSave }: NoteEditor
             style={[styles.headerButton, { backgroundColor: colors.headerButtonBg }]}
             onPress={() => onSave(title, body)}
           >
-            <Text style={[styles.headerButtonText, { color: colors.headerButtonText }]}>{"Save"}</Text>
+            <Text style={[styles.headerButtonText, { color: colors.headerButtonText }]}>{saveButtonText}</Text>
           </Pressable>
         </View>
       </ImageBackground>
@@ -79,7 +88,7 @@ export default function NoteEditor({ themeOverride, onBack, onSave }: NoteEditor
 
 function createStyles(colors: Palette) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
+    container: { flex: 1, backgroundColor: 'transparent' },
     header: {
       height: 140,
       justifyContent: "flex-end",
