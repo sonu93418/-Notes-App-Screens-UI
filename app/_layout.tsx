@@ -1,31 +1,31 @@
-import { Stack } from "expo-router";
-import { ImageBackground, StyleSheet, View } from "react-native";
+import { Slot } from "expo-router";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useColorScheme } from "react-native";
-
-const bg = require("../assets/images/splash-icon.png");
+import { getPalette } from "./theme";
 
 export default function RootLayout() {
   const scheme = useColorScheme();
-  const overlayColor = scheme === "dark" ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.15)";
+  const { width } = useWindowDimensions();
+  const colors = getPalette(scheme);
+  const horizontal = width > 700 ? 48 : 0;
+
+  // No app-wide background image; editor header handles images now.
 
   return (
-    <ImageBackground source={bg} style={styles.container} imageStyle={styles.image}>
-      <View style={[styles.overlay, { backgroundColor: overlayColor }]} />
-      <Stack />
-    </ImageBackground>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      <View style={[styles.content, { paddingHorizontal: horizontal }]}>
+        <Slot />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     flex: 1,
+    width: "100%",
   },
-  image: {
-    resizeMode: "cover",
-    opacity: 0.95,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 0,
+  root: {
+    flex: 1,
   },
 });

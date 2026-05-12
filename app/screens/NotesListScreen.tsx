@@ -122,8 +122,9 @@ function createStyles(colors: Palette) {
   return StyleSheet.create({
     container: {
       flex: 1,
+      width: "100%",
       paddingTop: 12,
-      backgroundColor: 'transparent',
+      backgroundColor: colors.background,
     },
     topRow: {
       marginBottom: 12,
@@ -166,7 +167,7 @@ function createStyles(colors: Palette) {
       paddingVertical: 12,
     },
     card: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.surfaceTransparent,
       padding: 14,
       borderRadius: 12,
       marginBottom: 10,

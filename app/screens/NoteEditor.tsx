@@ -8,6 +8,8 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  StatusBar,
   useColorScheme,
   useWindowDimensions,
 } from "react-native";
@@ -17,7 +19,7 @@ import { type Note } from "../hooks/useNotes";
 type NoteEditorProps = {
   themeOverride: ThemeOverride;
   onBack: () => void;
-  onSave: (title: string, body: string) => void;
+  onSave: (title: string, body: string, image?: string | null) => void;
   editingNote?: Note | null;
 };
 
@@ -31,6 +33,9 @@ export default function NoteEditor({ themeOverride, onBack, onSave, editingNote 
   const styles = useMemo(() => createStyles(colors), [colors]);
   const isEditing = !!editingNote;
   const saveButtonText = isEditing ? "Update" : "Save";
+  const headerImage = editingNote?.image
+    ? { uri: editingNote.image }
+    : require("../../assets/images/ChatGPT Image May 5, 2026, 12_49_08 AM.png");
 
   useEffect(() => {
     setTitle(editingNote?.title || "");
@@ -38,30 +43,40 @@ export default function NoteEditor({ themeOverride, onBack, onSave, editingNote 
   }, [editingNote]);
 
   return (
-    <KeyboardAvoidingView style={styles.container}
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: "padding", android: undefined })}
       keyboardVerticalOffset={80}
     >
-      <ImageBackground
-        source={require("../../assets/images/splash-icon.png")}
-        style={[styles.header, { paddingHorizontal: width > 700 ? 48 : 16 }]}
-        imageStyle={{ borderBottomLeftRadius: 18, borderBottomRightRadius: 18 }}
-      >
-        <View style={styles.headerRow}>
-          <Pressable
-            style={[styles.headerButton, { backgroundColor: colors.headerButtonBg }]}
-            onPress={onBack}
-          >
-            <Text style={[styles.headerButtonText, { color: colors.headerButtonText }]}>{"< Back"}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.headerButton, { backgroundColor: colors.headerButtonBg }]}
-            onPress={() => onSave(title, body)}
-          >
-            <Text style={[styles.headerButtonText, { color: colors.headerButtonText }]}>{saveButtonText}</Text>
-          </Pressable>
-        </View>
-      </ImageBackground>
+      <SafeAreaView style={{ backgroundColor: 'transparent' }}>
+        <ImageBackground
+          source={headerImage}
+          style={[
+            styles.header,
+            {
+              height: Math.max(190, Math.min(280, Math.round(width * 0.24))) + (Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0),
+            },
+          ]}
+          imageStyle={styles.headerImage}
+        >
+          <View style={styles.headerOverlay}>
+            <View style={[styles.headerRow, { paddingHorizontal: width > 700 ? 48 : 16 }]}>
+              <Pressable
+                style={[styles.headerButton, { backgroundColor: colors.accent }]}
+                onPress={onBack}
+              >
+                <Text style={[styles.headerButtonText, { color: colors.text }]}>Back</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.headerButton, { backgroundColor: colors.accent }]}
+                onPress={() => onSave(title, body, editingNote?.image ?? null)}
+              >
+                <Text style={[styles.headerButtonText, { color: colors.text }]}>{saveButtonText}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </ImageBackground>
+      </SafeAreaView>
 
       <View style={[styles.form, { paddingHorizontal: width > 700 ? 48 : 16 }]}>
         <TextInput
@@ -88,35 +103,53 @@ export default function NoteEditor({ themeOverride, onBack, onSave, editingNote 
 
 function createStyles(colors: Palette) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'transparent' },
+    container: { flex: 1 },
     header: {
-      height: 140,
-      justifyContent: "flex-end",
-      paddingVertical: 12,
-      backgroundColor: "rgba(100, 150, 200, 0.4)",
+      position: "relative",
+      overflow: "hidden",
+      borderBottomWidth: 1,
+      width: "100%",
+    },
+    headerImage: {
+      borderBottomLeftRadius: 18,
+      borderBottomRightRadius: 18,
+      resizeMode: "cover",
+    },
+    headerOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: "flex-start",
+      paddingTop: 16,
+      backgroundColor: "rgba(0,0,0,0.24)",
     },
     headerRow: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      width: "100%",
+      gap: 12,
     },
     headerButton: {
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 18,
+      borderRadius: 10,
+      minWidth: 96,
+      flexShrink: 0,
+      alignItems: "center",
     },
-    headerButtonText: { fontWeight: "600" },
-    form: { flex: 1, paddingTop: 16 },
+    headerButtonText: { fontWeight: "600", fontSize: 14 },
+    form: { flex: 1, width: "100%", paddingTop: 16, paddingHorizontal: 16 },
     titleInput: {
       fontSize: 20,
       fontWeight: "700",
       marginBottom: 12,
       color: colors.text,
+      paddingVertical: 8,
     },
     bodyInput: {
       flex: 1,
       fontSize: 16,
       color: colors.text,
+      paddingVertical: 8,
     },
   });
 }

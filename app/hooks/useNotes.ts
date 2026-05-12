@@ -42,6 +42,8 @@ export type Note = {
   title: string;
   body: string;
   date: string;
+  // optional image URI (local file uri or base64 data)
+  image?: string | null;
 };
 
 const STORAGE_KEY = "@notes_app_notes";

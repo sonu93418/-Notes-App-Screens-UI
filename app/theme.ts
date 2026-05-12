@@ -1,6 +1,7 @@
 export type Palette = {
   background: string;
   surface: string;
+  surfaceTransparent: string;
   text: string;
   muted: string;
   accent: string;
@@ -16,6 +17,7 @@ export const palettes: Record<string, Palette> = {
   light: {
     background: "#ffffff",
     surface: "#ffffff",
+    surfaceTransparent: "rgba(255,255,255,0.85)",
     text: "#0f172a",
     muted: "#6b7280",
     accent: "#eef2ff",
@@ -27,6 +29,7 @@ export const palettes: Record<string, Palette> = {
   dark: {
     background: "#0b0b0f",
     surface: "#0f1113",
+    surfaceTransparent: "rgba(15,17,19,0.6)",
     text: "#f8fafc",
     muted: "#9ca3af",
     accent: "#1f2937",
